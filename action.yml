@@ -1,0 +1,40 @@
+name: 'Sync Doppler to AWS Lambda'
+description: 'Easy way to sync Doppler to AWS Lambda'
+branding:
+  icon: 'package'
+  color: 'purple'
+inputs:
+  doppler_token:
+    description: 'Doppler Token'
+    required: true
+  function_name:
+    description: 'Function Name'
+    required: true
+  aws_access_key_id:
+    description: 'AWS Access Key ID'
+    required: true
+  aws_secret_access_key:
+    description: 'AWS Secret Access Key'
+    required: true
+  aws_region:
+    description: 'AWS Region'
+    required: false
+    default: 'us-east-1'
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        curl -L -o install-aws.sh https://raw.githubusercontent.com/unfor19/install-aws-cli-action/master/entrypoint.sh && \
+        chmod +x install-aws.sh
+        ./install-aws.sh "v2" "amd64"
+        rm install-aws.sh
+        echo Installing Doppler
+        (curl -Ls https://cli.doppler.com/install.sh || wget -qO- https://cli.doppler.com/install.sh) | sudo bash
+        echo Doppler Installed
+        export DOPPLER_TOKEN=${{ inputs.doppler_token }}
+        export AWS_ACCESS_KEY_ID=${{ inputs.aws_access_key_id }}
+        export AWS_SECRET_ACCESS_KEY=${{ inputs.aws_secret_access_key }}
+        export AWS_DEFAULT_REGION=${{ inputs.aws_region }}
+        aws lambda update-function-configuration --function-name ${{ inputs.function_name }} \
+            --environment "$(doppler secrets download --no-file | jq '{Variables: .}')"
+      shell: bash
