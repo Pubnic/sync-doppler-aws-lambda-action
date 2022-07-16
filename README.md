@@ -14,10 +14,10 @@ Easy way to sync Doppler to AWS Lambda
 
 ```yml
 - name: Deploy
-  uses: Pubnic/sync-doppler-aws-lambda-action@v1
+  uses: Pubnic/sync-doppler-aws-lambda-action@v0.1.2
   with:
-    doppler_token: <doppler_token>
-    function_name: <function_name>
+    doppler_token: ${{ secrets.DOPPLER_TOKEN }}
+    function_name: <function-name-production>
     aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
     aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     aws_region: ${{ secrets.AWS_DEFAULT_REGION }}
