@@ -35,6 +35,12 @@ runs:
         export AWS_ACCESS_KEY_ID=${{ inputs.aws_access_key_id }}
         export AWS_SECRET_ACCESS_KEY=${{ inputs.aws_secret_access_key }}
         export AWS_DEFAULT_REGION=${{ inputs.aws_region }}
+        echo Syncing Doppler to AWS Lambda
+        secrets=$(doppler secrets download --no-file | jq '.[]')
+        while read -r secret;
+        do
+          echo "::add-mask::${secret}"
+        done <<< "$secrets"
         aws lambda update-function-configuration --function-name ${{ inputs.function_name }} \
             --environment "$(doppler secrets download --no-file | jq '{Variables: .}')"
       shell: bash
